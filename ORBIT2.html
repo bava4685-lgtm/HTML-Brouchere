@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orbit — Employee Time & Productivity Platform (Prototype)</title>
+<style>
+  :root{
+    --bg: #F5F7FA;
+    --panel: #FFFFFF;
+    --panel-2: #F0F3F8;
+    --border: #E4E9F0;
+    --text: #17202E;
+    --text-dim: #5B6779;
+    --text-faint: #94A0B3;
+    --primary: #0E6E63;       /* deep teal */
+    --primary-soft: #E3F2EF;
+    --coral: #FF6B4A;
+    --coral-soft: #FFEAE4;
+    --violet: #6357E8;
+    --violet-soft: #ECEAFC;
+    --good: #1E9E6B;
+    --warn: #E8A33D;
+    --bad: #E5533D;
+    --radius: 16px;
+    --font-display: 'Sora', 'Segoe UI', sans-serif;
+    --font-body: 'Inter', 'Segoe UI', sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background: var(--primary-soft); color:var(--primary); }
+
+  /* ---------- LOGIN (centered card, gradient backdrop) ---------- */
+  #login-screen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:28px;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(99,87,232,0.55), transparent 45%),
+      radial-gradient(circle at 85% 30%, rgba(14,110,99,0.55), transparent 45%),
+      radial-gradient(circle at 60% 90%, rgba(255,107,74,0.35), transparent 50%),
+      linear-gradient(160deg, #6357E8 0%, #3E6FE0 45%, #0E6E63 100%);
+    position:relative; overflow:hidden;
+  }
+  .login-topbar{ position:absolute; top:28px; left:32px; right:32px; display:flex; align-items:center; justify-content:space-between; z-index:2; }
+  .login-back{ color:rgba(255,255,255,0.9); font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .login-topbrand{ position:absolute; top:32px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:8px; color:#fff; font-family:var(--font-display); font-weight:700; font-size:14px; letter-spacing:.03em; z-index:2; }
+  .login-topbrand .mark{ width:22px;height:22px;border-radius:6px; background:rgba(255,255,255,0.22); display:flex;align-items:center;justify-content:center; font-size:11px; }
+
+  .login-card{
+    position:relative; z-index:2; width:100%; max-width:400px; background:var(--panel);
+    border-radius:24px; padding:36px 34px; box-shadow: 0 30px 70px rgba(20,20,50,0.35);
+  }
+  .login-card h1{ font-family:var(--font-display); font-size:21px; font-weight:700; text-align:center; margin-bottom:6px; letter-spacing:-0.01em; }
+  .login-card p.sub{ color:var(--text-dim); font-size:12.5px; text-align:center; margin-bottom:24px; }
+
+  .role-pick{ display:flex; gap:8px; margin-bottom:20px; }
+  .role-chip{
+    flex:1; text-align:center; padding:8px 6px; border-radius:9px; border:1.5px solid var(--border);
+    font-size:11.5px; color:var(--text-dim); cursor:pointer; background:var(--panel-2); transition:.15s; font-weight:600;
+  }
+  .role-chip.active{ border-color:var(--violet); color:var(--violet); background:var(--violet-soft); }
+
+  .field{ margin-bottom:16px; }
+  .field label{ display:block; font-size:12px; color:var(--text); margin-bottom:6px; font-weight:700; }
+  .field .input-wrap{ position:relative; }
+  .field .input-wrap .ic{ position:absolute; left:13px; top:50%; transform:translateY(-50%); font-size:13px; opacity:.5; }
+  .field .input-wrap .eye{ position:absolute; right:13px; top:50%; transform:translateY(-50%); font-size:13px; opacity:.5; cursor:pointer; }
+  .field .input-wrap input{ padding-left:36px; padding-right:36px; }
+  .field input{
+    width:100%; background:var(--panel-2); border:1.5px solid var(--border);
+    border-radius:10px; padding:11px 13px; color:var(--text); font-size:13.5px; font-family:var(--font-body);
+    outline:none; transition: border-color .15s, box-shadow .15s;
+  }
+  .field input:focus{ border-color: var(--violet); box-shadow:0 0 0 4px var(--violet-soft); background:var(--panel); }
+
+  .row-between{ display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; }
+  .remember{ display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-dim); }
+  .remember input{ width:14px; height:14px; accent-color:var(--violet); }
+  .forgot{ font-size:12px; color:var(--violet); font-weight:700; text-decoration:none; }
+
+  .btn-primary{
+    width:100%; background: linear-gradient(135deg, var(--violet), #4F46E5); color:#fff; border:none;
+    border-radius:11px; padding:12.5px; font-weight:700; font-size:14px; cursor:pointer;
+    font-family:var(--font-body); transition: filter .15s, transform .1s;
+    box-shadow: 0 10px 24px rgba(99,87,232,0.3);
+  }
+  .btn-primary:hover{ filter:brightness(1.08); }
+  .btn-primary:active{ transform: scale(0.98); }
+
+  .sso-btn{
+    width:100%; margin-top:10px; display:flex; align-items:center; justify-content:center; gap:8px;
+    border:1.5px solid var(--border); background:var(--panel); border-radius:11px; padding:11.5px;
+    font-size:13px; font-weight:700; color:var(--text); cursor:pointer; transition:.15s;
+  }
+  .sso-btn:hover{ border-color:var(--violet); }
+
+  .login-foot{ text-align:center; margin-top:22px; font-size:12.5px; color:var(--text-faint); }
+  .login-foot a{ color:var(--violet); text-decoration:none; font-weight:700; }
+
+  /* ---------- APP SHELL ---------- */
+  #app-screen{ display:none; min-height:100vh; }
+  #app-screen.active{ display:flex; }
+
+  .sidebar{
+    width:232px; background:var(--panel); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; padding:22px 14px; flex-shrink:0;
+  }
+  .brand{ display:flex; align-items:center; gap:9px; padding:0 8px 26px; }
+  .brand-mark{ width:30px;height:30px;border-radius:8px; background:var(--primary); display:flex;align-items:center;justify-content:center; font-family:var(--font-display); font-weight:700; color:#fff; font-size:14px; }
+  .brand-name{ font-family:var(--font-display); font-weight:700; font-size:17px; letter-spacing:-0.01em; }
+
+  .nav-item{
+    display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px;
+    color:var(--text-dim); font-size:13.5px; font-weight:600; cursor:pointer; margin-bottom:2px;
+    transition: background .18s, color .18s, transform .12s;
+  }
+  .nav-item:active{ transform: scale(0.97); }
+  .nav-item .dot{ width:6px; height:6px; border-radius:50%; background:var(--text-faint); flex-shrink:0; }
+  .nav-item:hover{ background: var(--panel-2); color:var(--text); }
+  .nav-item.active{ background: var(--primary-soft); color:var(--primary); }
+  .nav-item.active .dot{ background:var(--primary); }
+  .nav-section-label{ font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); padding:16px 12px 6px; font-weight:700; }
+  .sidebar-foot{ margin-top:auto; padding:12px; border-top:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .avatar{ width:32px;height:32px;border-radius:50%; background:linear-gradient(135deg,var(--violet),#8B7EF0); display:flex;align-items:center;justify-content:center; font-size:12px; font-weight:700; color:#fff; font-family:var(--font-display); flex-shrink:0;}
+  .sidebar-foot .who{ font-size:12.5px; }
+  .sidebar-foot .who .name{ font-weight:700; }
+  .sidebar-foot .who .role{ color:var(--text-faint); font-size:11px; }
+
+  .main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  .topbar{
+    height:66px; border-bottom:1px solid var(--border); display:flex; align-items:center;
+    justify-content:space-between; padding:0 30px; flex-shrink:0; background:var(--panel);
+  }
+  .topbar h2{ font-family:var(--font-display); font-size:19px; font-weight:700; letter-spacing:-0.01em; }
+  .status-pill{
+    display:flex; align-items:center; gap:7px; background:var(--primary-soft); border:1px solid #CFE8E3;
+    padding:7px 14px; border-radius:100px; font-size:12.5px; font-weight:600; color:var(--primary);
+  }
+  .status-pill .pulse{ width:7px;height:7px;border-radius:50%; background:var(--good); box-shadow:0 0 0 0 rgba(30,158,107,.5); animation:pulse 2s infinite; }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(30,158,107,.5);} 70%{box-shadow:0 0 0 7px rgba(30,158,107,0);} 100%{box-shadow:0 0 0 0 rgba(30,158,107,0);}
+  }
+  .content{ padding:26px 30px 40px; overflow-y:auto; }
+  .screen{ display:none; }
+  .screen.active{ display:block; animation: fadein .25s ease; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+  .grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
+  .grid-2{ display:grid; grid-template-columns:1.4fr 1fr; gap:16px; margin-bottom:22px; }
+  @media(max-width:900px){ .grid-4{grid-template-columns:repeat(2,1fr);} .grid-2{grid-template-columns:1fr;} }
+
+  .card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:20px; box-shadow: 0 1px 2px rgba(23,32,46,0.03); transition: box-shadow .2s, transform .2s; }
+  .card:hover{ box-shadow: 0 8px 24px rgba(23,32,46,0.07); }
+  .metric-card .label{ font-size:12px; color:var(--text-dim); font-weight:600; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .metric-card .icon-chip{ width:30px;height:30px;border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .metric-card .value{ font-family:var(--font-display); font-size:27px; font-weight:700; letter-spacing:-0.02em; }
+  .metric-card .delta{ font-size:11.5px; margin-top:7px; font-weight:600; }
+  .metric-card .delta.up{ color:var(--good); }
+  .metric-card .delta.down{ color:var(--bad); }
+  .metric-card .bar-track{ height:6px; background:var(--panel-2); border-radius:4px; margin-top:12px; overflow:hidden;}
+  .metric-card .bar-fill{ height:100%; border-radius:4px; }
+
+  .card h3{ font-family:var(--font-display); font-size:15px; font-weight:700; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;}
+  .card h3 .tag{ font-size:11px; color:var(--text-dim); font-weight:600; background:var(--panel-2); padding:4px 10px; border-radius:100px; }
+
+  /* donut chart via conic-gradient */
+  .donut-wrap{ display:flex; align-items:center; gap:24px; }
+  .donut{
+    width:130px; height:130px; border-radius:50%; flex-shrink:0;
+    background: conic-gradient(var(--primary) 0% 68%, var(--coral) 68% 87%, var(--violet) 87% 100%);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .donut::before{ content:''; position:absolute; width:82px; height:82px; background:var(--panel); border-radius:50%; }
+  .donut .center{ position:relative; text-align:center; }
+  .donut .center b{ font-family:var(--font-display); font-size:19px; font-weight:700; display:block; }
+  .donut .center span{ font-size:10px; color:var(--text-faint); }
+  .donut-legend{ display:flex; flex-direction:column; gap:11px; }
+  .donut-legend .li{ display:flex; align-items:center; gap:9px; font-size:12.5px; }
+  .donut-legend i{ width:9px; height:9px; border-radius:3px; flex-shrink:0; }
+  .donut-legend b{ margin-left:auto; font-weight:700; }
+
+  /* weekly bar chart */
+  .chart{ display:flex; align-items:flex-end; gap:12px; height:150px; padding-top:10px; }
+  .chart .col{ flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .chart .stack{ width:100%; display:flex; flex-direction:column-reverse; border-radius:6px; overflow:hidden; height:118px; background:var(--panel-2);}
+  .chart .seg-prod{ background: var(--primary); }
+  .chart .seg-idle{ background: #D9DFE8; }
+  .chart .day-label{ font-size:10.5px; color:var(--text-faint); font-weight:600; }
+  .legend{ display:flex; gap:16px; margin-top:14px; font-size:11.5px; color:var(--text-dim); }
+  .legend span{ display:flex; align-items:center; gap:6px; }
+  .legend i{ width:8px; height:8px; border-radius:2px; display:inline-block; }
+
+  .status-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .status-row:last-child{ border-bottom:none; }
+  .badge{ font-size:11px; padding:4px 11px; border-radius:100px; font-weight:700; }
+  .badge.active{ background:#E3F5EC; color:var(--good); }
+  .badge.idle{ background:#EEF0F4; color:#6B7688; }
+  .badge.away{ background:var(--coral-soft); color:var(--coral); }
+  .badge.late{ background:#FDF1DE; color:var(--warn); }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th{ text-align:left; color:var(--text-faint); font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:0 12px 12px; }
+  td{ padding:13px 12px; border-top:1px solid var(--border); }
+  tr td:first-child, th:first-child{ padding-left:0; }
+  .person{ display:flex; align-items:center; gap:10px; }
+  .person .mini-avatar{ width:29px;height:29px;border-radius:50%; flex-shrink:0; display:flex;align-items:center;justify-content:center; font-size:11px; font-weight:700; font-family:var(--font-display); color:#fff;}
+  .person .n{ font-weight:700; font-size:13px; }
+  .person .r{ font-size:11px; color:var(--text-faint); }
+  .mini-progress{ width:80px; height:6px; background:var(--panel-2); border-radius:4px; overflow:hidden; display:inline-block; margin-right:8px; vertical-align:middle;}
+  .mini-progress i{ display:block; height:100%; background:var(--primary); }
+
+  .toolbar{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center; }
+  select, .btn-ghost, .date-input{
+    background:var(--panel); border:1.5px solid var(--border); color:var(--text);
+    padding:9px 13px; border-radius:9px; font-size:12.5px; font-family:var(--font-body); cursor:pointer; font-weight:600;
+  }
+  .btn-ghost{ display:flex; align-items:center; gap:6px; }
+  .btn-ghost:hover{ border-color:var(--primary); color:var(--primary); }
+  .btn-accent{ background:var(--primary); color:#fff; border:none; font-weight:700; padding:9px 16px; border-radius:9px; font-size:12.5px; cursor:pointer;}
+
+  .row-flex{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--border); }
+  .row-flex:last-child{ border:none; }
+  .row-flex .t{ font-size:13.5px; font-weight:600; }
+  .row-flex .d{ font-size:11.5px; color:var(--text-faint); margin-top:2px;}
+  .switch{ width:38px; height:21px; background:var(--panel-2); border:1px solid var(--border); border-radius:100px; position:relative; cursor:pointer; flex-shrink:0;}
+  .switch.on{ background:var(--primary-soft); border-color:var(--primary); }
+  .switch::after{ content:''; width:15px; height:15px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.25); border-radius:50%; position:absolute; top:2px; left:2px; transition:.2s; }
+  .switch.on::after{ background:var(--primary); left:19px; }
+
+  .proto-badge{
+    position:fixed; bottom:16px; right:16px; background:var(--panel); border:1px solid var(--border);
+    padding:8px 14px; border-radius:100px; font-size:11px; color:var(--text-faint); z-index:50;
+    box-shadow:0 6px 20px rgba(23,32,46,.08); font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="login-screen">
+  <div class="login-topbar"><div class="login-back">‹ Home page</div></div>
+  <div class="login-topbrand"><div class="mark">O</div>ORBIT</div>
+
+  <div class="login-card">
+    <h1>Welcome back!</h1>
+    <p class="sub">Sign in to track time, attendance, and productivity.</p>
+
+    <div class="role-pick">
+      <div class="role-chip active" data-role="employee" onclick="pickRole(this,'employee')">Employee</div>
+      <div class="role-chip" data-role="manager" onclick="pickRole(this,'manager')">Manager</div>
+      <div class="role-chip" data-role="admin" onclick="pickRole(this,'admin')">Admin</div>
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <div class="input-wrap"><span class="ic">✉</span><input type="email" placeholder="Enter your email" value="anitha.raman@company.com" /></div>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <div class="input-wrap"><span class="ic">🔒</span><input type="password" placeholder="Enter password" value="••••••••" /><span class="eye">🙈</span></div>
+    </div>
+
+    <div class="row-between">
+      <label class="remember"><input type="checkbox" checked /> Remember me</label>
+      <a class="forgot" href="#" onclick="event.preventDefault()">Forgot password?</a>
+    </div>
+
+    <button class="btn-primary" onclick="login()">Sign in</button>
+    <button class="sso-btn">🔷 Sign in with Google</button>
+
+    <p class="login-foot">Prototype only — sample data. <a href="#" onclick="event.preventDefault(); login()">Skip to dashboard →</a></p>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app-screen">
+  <div class="sidebar">
+    <div class="brand"><div class="brand-mark">O</div><div class="brand-name">Orbit</div></div>
+
+    <div class="nav-section-label">Overview</div>
+    <div class="nav-item active" data-screen="dashboard" data-roles="employee,manager,admin" onclick="nav(this,'dashboard')"><span class="dot"></span>Dashboard</div>
+    <div class="nav-item" data-screen="attendance" data-roles="employee,manager,admin" onclick="nav(this,'attendance')"><span class="dot"></span>Attendance</div>
+    <div class="nav-item" data-screen="timesheet" data-roles="employee,manager,admin" onclick="nav(this,'timesheet')"><span class="dot"></span>Timesheet</div>
+
+    <div class="nav-section-label">Team</div>
+    <div class="nav-item" data-screen="team" data-roles="manager,admin" onclick="nav(this,'team')"><span class="dot"></span>Team View</div>
+    <div class="nav-item" data-screen="workload" data-roles="manager,admin" onclick="nav(this,'workload')"><span class="dot"></span>Workload Analysis</div>
+    <div class="nav-item" data-screen="reports" data-roles="manager,admin" onclick="nav(this,'reports')"><span class="dot"></span>Reports</div>
+
+    <div class="nav-section-label">Enterprise Modules</div>
+    <div class="nav-item" data-screen="workoutput" data-roles="manager,admin" onclick="nav(this,'workoutput')"><span class="dot"></span>Work Output</div>
+    <div class="nav-item" data-screen="workflow" data-roles="manager,admin" onclick="nav(this,'workflow')"><span class="dot"></span>Workflow Mgmt</div>
+    <div class="nav-item" data-screen="analytics" data-roles="manager,admin" onclick="nav(this,'analytics')"><span class="dot"></span>Advanced Analytics</div>
+    <div class="nav-item" data-screen="assets" data-roles="admin" onclick="nav(this,'assets')"><span class="dot"></span>Asset Optimization</div>
+    <div class="nav-item" data-screen="screencap" data-roles="admin" onclick="nav(this,'screencap')"><span class="dot"></span>Screen Capture</div>
+    <div class="nav-item" data-screen="workforce" data-roles="manager,admin" onclick="nav(this,'workforce')"><span class="dot"></span>Workforce Planning</div>
+    <div class="nav-item" data-screen="cost" data-roles="admin" onclick="nav(this,'cost')"><span class="dot"></span>Cost Optimization</div>
+
+    <div class="nav-section-label">System</div>
+    <div class="nav-item" data-screen="admin" data-roles="admin" onclick="nav(this,'admin')"><span class="dot"></span>Admin Settings</div>
+    <div class="nav-item" data-screen="demo" data-roles="admin" onclick="nav(this,'demo')"><span class="dot"></span>Book a Demo</div>
+    <div class="nav-item" data-screen="support" data-roles="employee,manager,admin" onclick="nav(this,'support')"><span class="dot"></span>Help & Support</div>
+
+    <div class="sidebar-foot">
+      <div class="avatar">AR</div>
+      <div class="who"><div class="name">Anitha Raman</div><div class="role" id="who-role">Employee</div></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <h2 id="topbar-title">Dashboard</h2>
+      <div class="status-pill"><span class="pulse"></span> Active — 02:14:09 today</div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="screen active" id="screen-dashboard">
+        <div class="grid-4">
+          <div class="card metric-card">
+            <div class="label">Logged today <span class="icon-chip" style="background:var(--primary-soft);">🕐</span></div>
+            <div class="value">6h 42m</div>
+            <div class="delta up">↑ On track for 8h</div>
+            <div class="bar-track"><div class="bar-fill" style="width:78%; background:var(--primary);"></div></div>
+          </div>
+          <div class="card metric-card">
+            <div class="label">Productive hours <span class="icon-chip" style="background:#E3F5EC;">⚡</span></div>
+            <div class="value">5h 51m</div>
+            <div class="delta up">↑ 87% productive</div>
+            <div class="bar-track"><div class="bar-fill" style="width:87%; background:var(--good);"></div></div>
+          </div>
+          <div class="card metric-card">
+            <div class="label">Idle time <span class="icon-chip" style="background:var(--coral-soft);">💤</span></div>
+            <div class="value">51m</div>
+            <div class="delta down">↓ 13% of logged time</div>
+            <div class="bar-track"><div class="bar-fill" style="width:13%; background:var(--coral);"></div></div>
+          </div>
+          <div class="card metric-card">
+            <div class="label">Attendance streak <span class="icon-chip" style="background:var(--violet-soft);">🔥</span></div>
+            <div class="value">14 days</div>
+            <div class="delta up">↑ Personal best</div>
+            <div class="bar-track"><div class="bar-fill" style="width:100%; background:var(--violet);"></div></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>This week <span class="tag">Mon – Fri</span></h3>
+            <div class="chart">
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:70%;"></div><div class="seg-idle" style="height:12%;"></div></div><div class="day-label">Mon</div></div>
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:75%;"></div><div class="seg-idle" style="height:8%;"></div></div><div class="day-label">Tue</div></div>
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:60%;"></div><div class="seg-idle" style="height:20%;"></div></div><div class="day-label">Wed</div></div>
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:80%;"></div><div class="seg-idle" style="height:6%;"></div></div><div class="day-label">Thu</div></div>
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:73%;"></div><div class="seg-idle" style="height:11%;"></div></div><div class="day-label">Fri</div></div>
+            </div>
+            <div class="legend"><span><i style="background:var(--primary);"></i>Productive</span><span><i style="background:#D9DFE8;"></i>Idle</span></div>
+          </div>
+
+          <div class="card">
+            <h3>Time distribution</h3>
+            <div class="donut-wrap">
+              <div class="donut"><div class="center"><b>87%</b><span>productive</span></div></div>
+              <div class="donut-legend">
+                <div class="li"><i style="background:var(--primary);"></i>Productive <b>5h 51m</b></div>
+                <div class="li"><i style="background:var(--coral);"></i>Idle <b>51m</b></div>
+                <div class="li"><i style="background:var(--violet);"></i>Break <b>18m</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>Today's timeline</h3>
+            <div class="status-row"><span>09:02 AM — Clocked in</span><span class="badge active">Active</span></div>
+            <div class="status-row"><span>11:20 AM — Idle 6 min</span><span class="badge idle">Idle</span></div>
+            <div class="status-row"><span>01:00 PM — Lunch break</span><span class="badge away">Away</span></div>
+            <div class="status-row"><span>01:45 PM — Back, active</span><span class="badge active">Active</span></div>
+            <div class="status-row"><span>Now — Working</span><span class="badge active">Active</span></div>
+          </div>
+          <div class="card">
+            <h3>Weekly goal <span class="tag">40h target</span></h3>
+            <div class="bar-track" style="height:9px; margin-top:6px;"><div class="bar-fill" style="width:64%; background:var(--primary);"></div></div>
+            <p style="font-size:12.5px; color:var(--text-dim); margin-top:12px;">25h 40m logged of 40h weekly target.</p>
+            <p style="font-size:12.5px; color:var(--text-dim); margin-top:6px;">3 working days left this week.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATTENDANCE -->
+      <div class="screen" id="screen-attendance">
+        <div class="grid-4">
+          <div class="card metric-card"><div class="label">Present days</div><div class="value">18</div></div>
+          <div class="card metric-card"><div class="label">Late arrivals</div><div class="value">2</div></div>
+          <div class="card metric-card"><div class="label">Leaves taken</div><div class="value">1</div></div>
+          <div class="card metric-card"><div class="label">Avg. clock-in</div><div class="value">9:07 AM</div></div>
+        </div>
+        <div class="card">
+          <h3>August attendance log</h3>
+          <table>
+            <tr><th>Date</th><th>Clock in</th><th>Clock out</th><th>Total</th><th>Status</th></tr>
+            <tr><td>Aug 11</td><td>09:02 AM</td><td>06:10 PM</td><td>9h 08m</td><td><span class="badge active">Present</span></td></tr>
+            <tr><td>Aug 10</td><td>09:34 AM</td><td>06:02 PM</td><td>8h 28m</td><td><span class="badge late">Late</span></td></tr>
+            <tr><td>Aug 9</td><td>—</td><td>—</td><td>—</td><td><span class="badge idle">On leave</span></td></tr>
+            <tr><td>Aug 8</td><td>08:58 AM</td><td>06:05 PM</td><td>9h 07m</td><td><span class="badge active">Present</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- TIMESHEET -->
+      <div class="screen" id="screen-timesheet">
+        <div class="toolbar">
+          <select><option>This week</option><option>Last week</option><option>This month</option></select>
+          <button class="btn-ghost">📤 Export CSV</button>
+        </div>
+        <div class="card">
+          <h3>Timesheet breakdown</h3>
+          <table>
+            <tr><th>Date</th><th>Logged</th><th>Productive</th><th>Idle</th><th>Away</th><th>Adherence</th></tr>
+            <tr><td>Mon, Aug 11</td><td>8h 20m</td><td>7h 05m</td><td>52m</td><td>23m</td><td><span class="mini-progress"><i style="width:88%;"></i></span>88%</td></tr>
+            <tr><td>Tue, Aug 12</td><td>8h 42m</td><td>7h 30m</td><td>40m</td><td>32m</td><td><span class="mini-progress"><i style="width:91%;"></i></span>91%</td></tr>
+            <tr><td>Wed, Aug 13</td><td>6h 42m</td><td>5h 51m</td><td>51m</td><td>0m</td><td><span class="mini-progress"><i style="width:79%;"></i></span>79%</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- TEAM VIEW -->
+      <div class="screen" id="screen-team">
+        <div class="toolbar">
+          <select><option>All teams</option><option>Design</option><option>Engineering</option></select>
+          <select><option>Today</option><option>This week</option></select>
+        </div>
+        <div class="card">
+          <h3>Team activity <span class="tag">8 members</span></h3>
+          <table>
+            <tr><th>Member</th><th>Status</th><th>Logged today</th><th>Productive %</th><th>Attendance</th></tr>
+            <tr><td><div class="person"><div class="mini-avatar" style="background:var(--primary);">SK</div><div><div class="n">Suresh Kumar</div><div class="r">Frontend Engineer</div></div></div></td><td><span class="badge active">Active</span></td><td>6h 10m</td><td><span class="mini-progress"><i style="width:84%;"></i></span>84%</td><td>On time</td></tr>
+            <tr><td><div class="person"><div class="mini-avatar" style="background:var(--violet);">DP</div><div><div class="n">Divya Prasad</div><div class="r">QA Analyst</div></div></div></td><td><span class="badge idle">Idle 4m</span></td><td>5h 52m</td><td><span class="mini-progress"><i style="width:76%;"></i></span>76%</td><td>On time</td></tr>
+            <tr><td><div class="person"><div class="mini-avatar" style="background:var(--coral);">MJ</div><div><div class="n">Manoj J</div><div class="r">Backend Engineer</div></div></div></td><td><span class="badge away">Break</span></td><td>4h 30m</td><td><span class="mini-progress"><i style="width:68%;"></i></span>68%</td><td>Late (9:32)</td></tr>
+            <tr><td><div class="person"><div class="mini-avatar" style="background:#1E9E6B;">RV</div><div><div class="n">Radhika V</div><div class="r">Product Designer</div></div></div></td><td><span class="badge active">Active</span></td><td>6h 45m</td><td><span class="mini-progress"><i style="width:92%;"></i></span>92%</td><td>On time</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- WORKLOAD ANALYSIS -->
+      <div class="screen" id="screen-workload">
+        <div class="grid-2">
+          <div class="card">
+            <h3>Hours by project</h3>
+            <div class="chart">
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:90%;"></div></div><div class="day-label">Client A</div></div>
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:65%;"></div></div><div class="day-label">Client B</div></div>
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:40%;"></div></div><div class="day-label">Internal</div></div>
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:52%;"></div></div><div class="day-label">R&D</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Work mode split</h3>
+            <div class="donut-wrap">
+              <div class="donut" style="background:conic-gradient(var(--primary) 0% 62%, var(--violet) 62% 100%);"><div class="center"><b>62%</b><span>office</span></div></div>
+              <div class="donut-legend">
+                <div class="li"><i style="background:var(--primary);"></i>Work from office <b>62%</b></div>
+                <div class="li"><i style="background:var(--violet);"></i>Work from home <b>38%</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Top applications used <span class="tag">This week</span></h3>
+          <table>
+            <tr><th>Application</th><th>Category</th><th>Hours</th><th>Share</th></tr>
+            <tr><td>VS Code</td><td>Development</td><td>18h 20m</td><td><span class="mini-progress"><i style="width:76%;"></i></span>76%</td></tr>
+            <tr><td>Slack</td><td>Collaboration</td><td>6h 05m</td><td><span class="mini-progress"><i style="width:26%;"></i></span>26%</td></tr>
+            <tr><td>Google Sheets</td><td>Reporting</td><td>4h 40m</td><td><span class="mini-progress"><i style="width:19%;"></i></span>19%</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="screen" id="screen-reports">
+        <div class="toolbar">
+          <select><option>Logged hours</option><option>Idle hours</option><option>Productive hours</option><option>Attendance summary</option></select>
+          <input class="date-input" type="text" value="Aug 1 – Aug 13" readonly />
+          <select><option>All teams</option><option>Design</option><option>Engineering</option></select>
+          <button class="btn-accent">Generate report</button>
+          <button class="btn-ghost">📤 Export PDF</button>
+        </div>
+        <div class="card">
+          <h3>Report preview <span class="tag">Logged hours · Aug 1–13</span></h3>
+          <table>
+            <tr><th>Member</th><th>Total logged</th><th>Productive</th><th>Idle</th><th>Attendance %</th></tr>
+            <tr><td>Suresh Kumar</td><td>68h 20m</td><td>58h 10m</td><td>7h 05m</td><td>96%</td></tr>
+            <tr><td>Divya Prasad</td><td>64h 40m</td><td>52h 30m</td><td>9h 20m</td><td>92%</td></tr>
+            <tr><td>Manoj J</td><td>59h 05m</td><td>44h 15m</td><td>12h 10m</td><td>85%</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- WORK OUTPUT -->
+      <div class="screen" id="screen-workoutput">
+        <div class="grid-4">
+          <div class="card metric-card"><div class="label">Target achievement</div><div class="value">94%</div><div class="delta up">↑ 6% vs last month</div></div>
+          <div class="card metric-card"><div class="label">Units processed</div><div class="value">12,480</div><div class="delta up">↑ 340 today</div></div>
+          <div class="card metric-card"><div class="label">Avg. output/hour</div><div class="value">18.6</div><div class="delta up">↑ 1.2 vs baseline</div></div>
+          <div class="card metric-card"><div class="label">Quality score</div><div class="value">96.2%</div><div class="delta down">↓ 0.4%</div></div>
+        </div>
+        <div class="card">
+          <h3>Output vs target by team <span class="tag">This month</span></h3>
+          <table>
+            <tr><th>Team</th><th>Target</th><th>Achieved</th><th>Variance</th><th>Status</th></tr>
+            <tr><td>Claims Processing</td><td>5,000</td><td>4,820</td><td>-3.6%</td><td><span class="badge late">Below target</span></td></tr>
+            <tr><td>Underwriting</td><td>3,200</td><td>3,410</td><td>+6.5%</td><td><span class="badge active">On track</span></td></tr>
+            <tr><td>KYC/AML Review</td><td>4,000</td><td>4,250</td><td>+6.2%</td><td><span class="badge active">On track</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- WORKFLOW MANAGEMENT -->
+      <div class="screen" id="screen-workflow">
+        <div class="toolbar">
+          <select><option>All queues</option><option>Claims</option><option>Support tickets</option></select>
+          <select><option>Priority: All</option><option>High</option><option>Medium</option><option>Low</option></select>
+          <button class="btn-accent">+ New task</button>
+        </div>
+        <div class="card">
+          <h3>Task queue <span class="tag">24 open</span></h3>
+          <table>
+            <tr><th>Task</th><th>Assigned to</th><th>Priority</th><th>SLA</th><th>Status</th></tr>
+            <tr><td>Claim #10234 review</td><td>Suresh Kumar</td><td><span class="badge late">High</span></td><td>2h left</td><td><span class="badge active">In progress</span></td></tr>
+            <tr><td>KYC doc verification</td><td>Divya Prasad</td><td><span class="badge idle">Medium</span></td><td>1d left</td><td><span class="badge idle">Queued</span></td></tr>
+            <tr><td>Policy renewal batch</td><td>Manoj J</td><td><span class="badge active">Low</span></td><td>3d left</td><td><span class="badge active">In progress</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADVANCED ANALYTICS -->
+      <div class="screen" id="screen-analytics">
+        <div class="grid-2">
+          <div class="card">
+            <h3>Benefit realization <span class="tag">What-if model</span></h3>
+            <p style="font-size:12.5px; color:var(--text-dim); margin-bottom:14px;">Projected capacity gain if idle time is reduced by 20%:</p>
+            <div class="bar-track" style="height:9px;"><div class="bar-fill" style="width:72%; background:var(--violet);"></div></div>
+            <p style="font-size:22px; font-family:var(--font-display); font-weight:700; margin-top:14px;">+3.4 FTE</p>
+            <p style="font-size:11.5px; color:var(--text-faint);">equivalent capacity unlocked / quarter</p>
+          </div>
+          <div class="card">
+            <h3>Variation analysis</h3>
+            <div class="chart">
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:55%;"></div></div><div class="day-label">Team A</div></div>
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:80%;"></div></div><div class="day-label">Team B</div></div>
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:35%;"></div></div><div class="day-label">Team C</div></div>
+              <div class="col"><div class="stack"><div class="seg-prod" style="height:68%;"></div></div><div class="day-label">Team D</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Top & bottom performers <span class="tag">This week</span></h3>
+          <table>
+            <tr><th>Member</th><th>Productive %</th><th>Rank</th></tr>
+            <tr><td>Radhika V</td><td>92%</td><td><span class="badge active">Top 5%</span></td></tr>
+            <tr><td>Manoj J</td><td>68%</td><td><span class="badge late">Needs support</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ASSET OPTIMIZATION -->
+      <div class="screen" id="screen-assets">
+        <div class="grid-4">
+          <div class="card metric-card"><div class="label">Seat utilization</div><div class="value">78%</div></div>
+          <div class="card metric-card"><div class="label">Idle licenses</div><div class="value">14</div></div>
+          <div class="card metric-card"><div class="label">Active endpoints</div><div class="value">212</div></div>
+          <div class="card metric-card"><div class="label">Underused software</div><div class="value">6 tools</div></div>
+        </div>
+        <div class="card">
+          <h3>Software utilization</h3>
+          <table>
+            <tr><th>Software</th><th>Licenses</th><th>In-use</th><th>Utilization</th></tr>
+            <tr><td>Figma</td><td>25</td><td>24</td><td><span class="mini-progress"><i style="width:96%;"></i></span>96%</td></tr>
+            <tr><td>Adobe Suite</td><td>18</td><td>9</td><td><span class="mini-progress"><i style="width:50%;"></i></span>50%</td></tr>
+            <tr><td>Jira</td><td>40</td><td>38</td><td><span class="mini-progress"><i style="width:95%;"></i></span>95%</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- SCREEN CAPTURE -->
+      <div class="screen" id="screen-screencap">
+        <div class="toolbar">
+          <select><option>All employees</option><option>Flagged only</option></select>
+          <select><option>Today</option><option>This week</option></select>
+        </div>
+        <div class="card">
+          <h3>Capture rules <span class="tag">Compliance</span></h3>
+          <div class="row-flex"><div><div class="t">Random interval capture</div><div class="d">Screenshot every 10-15 min (randomized)</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="row-flex"><div><div class="t">Trigger-based capture</div><div class="d">Capture on flagged keyword/app usage</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="row-flex"><div><div class="t">Blur sensitive fields</div><div class="d">Auto-blur password/payment fields</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <div class="card">
+          <h3>Recent captures <span class="tag">Sample log</span></h3>
+          <table>
+            <tr><th>Employee</th><th>Time</th><th>Trigger</th><th>Reviewed</th></tr>
+            <tr><td>Manoj J</td><td>11:42 AM</td><td>Random interval</td><td>—</td></tr>
+            <tr><td>Divya Prasad</td><td>10:15 AM</td><td>Flagged app</td><td><span class="badge active">Reviewed</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- WORKFORCE PLANNING -->
+      <div class="screen" id="screen-workforce">
+        <div class="grid-4">
+          <div class="card metric-card"><div class="label">Forecasted demand</div><div class="value">1,240 hrs</div></div>
+          <div class="card metric-card"><div class="label">Scheduled capacity</div><div class="value">1,180 hrs</div></div>
+          <div class="card metric-card"><div class="label">Coverage gap</div><div class="value">60 hrs</div></div>
+          <div class="card metric-card"><div class="label">Open shifts</div><div class="value">7</div></div>
+        </div>
+        <div class="card">
+          <h3>This week's shift schedule</h3>
+          <table>
+            <tr><th>Member</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th></tr>
+            <tr><td>Suresh Kumar</td><td>9-6</td><td>9-6</td><td>9-6</td><td>9-6</td><td>Off</td></tr>
+            <tr><td>Divya Prasad</td><td>11-8</td><td>11-8</td><td>Off</td><td>11-8</td><td>11-8</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- COST OPTIMIZATION -->
+      <div class="screen" id="screen-cost">
+        <div class="grid-4">
+          <div class="card metric-card"><div class="label">Cost per output unit</div><div class="value">₹42</div><div class="delta up">↓ 8% vs last quarter</div></div>
+          <div class="card metric-card"><div class="label">Latent capacity value</div><div class="value">₹4.2L</div></div>
+          <div class="card metric-card"><div class="label">FTE capacity realized</div><div class="value">18%</div></div>
+          <div class="card metric-card"><div class="label">Projected savings</div><div class="value">₹9.8L / yr</div></div>
+        </div>
+        <div class="card">
+          <h3>Cost drivers</h3>
+          <div class="donut-wrap">
+            <div class="donut" style="background:conic-gradient(var(--primary) 0% 45%, var(--coral) 45% 75%, var(--violet) 75% 100%);"><div class="center"><b>₹18L</b><span>total cost</span></div></div>
+            <div class="donut-legend">
+              <div class="li"><i style="background:var(--primary);"></i>Idle time cost <b>45%</b></div>
+              <div class="li"><i style="background:var(--coral);"></i>Overtime cost <b>30%</b></div>
+              <div class="li"><i style="background:var(--violet);"></i>Rework cost <b>25%</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOOK A DEMO -->
+      <div class="screen" id="screen-demo">
+        <div class="grid-2">
+          <div class="card">
+            <h3>Book a demo / onboarding walkthrough</h3>
+            <p style="font-size:12.5px; color:var(--text-dim); margin-bottom:18px;">For admins rolling this out to a new team — schedule a guided walkthrough of Orbit's modules.</p>
+            <div class="field"><label>Full name</label><input value="Anitha Raman" /></div>
+            <div class="field"><label>Work email</label><input value="anitha.raman@company.com" /></div>
+            <div class="field"><label>Team / Department</label><input placeholder="e.g. Customer Support" /></div>
+            <div class="field"><label>What would you like covered?</label>
+              <textarea style="width:100%; background:var(--panel-2); border:1.5px solid var(--border); border-radius:10px; padding:11px 13px; font-family:var(--font-body); font-size:14px; min-height:80px; resize:vertical;" placeholder="e.g. Setting up idle-time thresholds and report scheduling"></textarea>
+            </div>
+            <button class="btn-accent" style="width:100%; padding:11px;">Request demo slot</button>
+          </div>
+          <div class="card">
+            <h3>What's covered <span class="tag">30 min session</span></h3>
+            <div class="status-row"><span>Dashboard & activity tracking setup</span><span class="badge active">Included</span></div>
+            <div class="status-row"><span>Attendance & timesheet configuration</span><span class="badge active">Included</span></div>
+            <div class="status-row"><span>Reports & export scheduling</span><span class="badge active">Included</span></div>
+            <div class="status-row"><span>Role & permission setup</span><span class="badge active">Included</span></div>
+            <div class="status-row"><span>Enterprise modules (Workflow, Analytics)</span><span class="badge idle">On request</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HELP & SUPPORT -->
+      <div class="screen" id="screen-support">
+        <div class="grid-2">
+          <div class="card">
+            <h3>Raise a request</h3>
+            <div class="field"><label>Request type</label>
+              <select style="width:100%;"><option>Product support ticket</option><option>Request a training / walkthrough</option><option>Report a bug</option><option>Feature request</option></select>
+            </div>
+            <div class="field"><label>Your name</label><input value="Anitha Raman" /></div>
+            <div class="field"><label>Work email</label><input value="anitha.raman@company.com" /></div>
+            <div class="field"><label>Describe your requirement</label>
+              <textarea style="width:100%; background:var(--panel); border:1.5px solid var(--border); border-radius:10px; padding:11px 13px; font-family:var(--font-body); font-size:14px; min-height:90px; resize:vertical;" placeholder="e.g. Need a walkthrough of the Reports module for my team"></textarea>
+            </div>
+            <button class="btn-primary" style="margin-top:4px;">Submit request</button>
+          </div>
+
+          <div class="card">
+            <h3>Live chat <span class="tag">Avg. reply 4 min</span></h3>
+            <div style="background:var(--panel-2); border-radius:12px; padding:16px; margin-bottom:12px;">
+              <div style="font-size:12.5px; color:var(--text-dim); margin-bottom:10px;">Support Bot</div>
+              <div style="background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-size:13px; margin-bottom:10px;">Hi Anitha 👋 How can I help you today?</div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn-ghost" style="font-size:11.5px;">Schedule a training call</button>
+                <button class="btn-ghost" style="font-size:11.5px;">Talk to admin</button>
+                <button class="btn-ghost" style="font-size:11.5px;">View FAQs</button>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:0;"><input placeholder="Type a message…" /></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Recent requests</h3>
+          <table>
+            <tr><th>Request</th><th>Type</th><th>Submitted</th><th>Status</th></tr>
+            <tr><td>Reports module walkthrough</td><td>Training</td><td>Aug 10</td><td><span class="badge active">Completed</span></td></tr>
+            <tr><td>Idle-time threshold not saving</td><td>Bug report</td><td>Aug 12</td><td><span class="badge late">In review</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div class="screen" id="screen-admin">
+        <div class="grid-2">
+          <div class="card">
+            <h3>Working hours policy</h3>
+            <div class="row-flex"><div><div class="t">Standard work day</div><div class="d">Expected hours per day</div></div><div style="font-weight:700; font-size:13px;">8h 00m</div></div>
+            <div class="row-flex"><div><div class="t">Idle threshold</div><div class="d">Minutes of no activity before "idle"</div></div><div style="font-weight:700; font-size:13px;">5 min</div></div>
+            <div class="row-flex"><div><div class="t">Grace period for late clock-in</div><div class="d">Buffer before marking "late"</div></div><div style="font-weight:700; font-size:13px;">15 min</div></div>
+          </div>
+          <div class="card">
+            <h3>System toggles</h3>
+            <div class="row-flex"><div><div class="t">Auto-idle detection</div><div class="d">Detect idle via mouse/keyboard inactivity</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="row-flex"><div><div class="t">Late clock-in alerts</div><div class="d">Notify manager on late arrival</div></div><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="row-flex"><div><div class="t">Weekly summary email</div><div class="d">Send Friday summary to employees</div></div><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>User management <span class="tag">12 users</span></h3>
+          <table>
+            <tr><th>Name</th><th>Email</th><th>Role</th><th>Team</th><th></th></tr>
+            <tr><td>Anitha Raman</td><td>anitha.raman@company.com</td><td>Employee</td><td>Design</td><td><span class="badge active">Active</span></td></tr>
+            <tr><td>Suresh Kumar</td><td>suresh.kumar@company.com</td><td>Employee</td><td>Engineering</td><td><span class="badge active">Active</span></td></tr>
+            <tr><td>Priya Menon</td><td>priya.menon@company.com</td><td>Manager</td><td>Design</td><td><span class="badge active">Active</span></td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="proto-badge">⚙ Clickable prototype — sample data, no backend</div>
+
+<script>
+  function pickRole(el, role){
+    document.querySelectorAll('.role-chip').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+    window.__role = role;
+  }
+  function applyRoleAccess(role){
+    // Hide any nav item + its section label whose data-roles doesn't include this role.
+    document.querySelectorAll('.nav-item').forEach(function(item){
+      var allowed = (item.getAttribute('data-roles') || '').split(',');
+      item.style.display = allowed.indexOf(role) > -1 ? 'flex' : 'none';
+    });
+    // Hide section labels that have no visible items left under them.
+    document.querySelectorAll('.nav-section-label').forEach(function(label){
+      var sib = label.nextElementSibling, hasVisible = false;
+      while(sib && !sib.classList.contains('nav-section-label')){
+        if(sib.classList.contains('nav-item') && sib.style.display !== 'none'){ hasVisible = true; }
+        sib = sib.nextElementSibling;
+      }
+      label.style.display = hasVisible ? 'block' : 'none';
+    });
+  }
+  function login(){
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').classList.add('active');
+    var role = window.__role || 'employee';
+    var roleLabel = role.charAt(0).toUpperCase()+role.slice(1);
+    document.getElementById('who-role').textContent = roleLabel;
+    applyRoleAccess(role);
+    if(role === 'manager'){ nav(document.querySelector('[data-screen="team"]'), 'team'); }
+    else if(role === 'admin'){ nav(document.querySelector('[data-screen="admin"]'), 'admin'); }
+    else { nav(document.querySelector('[data-screen="dashboard"]'), 'dashboard'); }
+  }
+  function nav(el, screen){
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('screen-'+screen).classList.add('active');
+    document.getElementById('topbar-title').textContent = el.textContent;
+  }
+</script>
+</body>
+</html>
